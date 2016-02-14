@@ -57,12 +57,26 @@ With ``once`` the callback will be called, you guessed it, only once.
     instance.emit('my event', 'Earth')  # arguments can be passed along events
     instance.emit('my event')  # do_stuff won't be called
 
-It's possible to block wait for an event. If there are event arguments they will be returned.
+It's possible to block wait for an event.
+ If there are event arguments they will be returned as a ``tuple``
 
 .. code:: python
 
     my_args = instance.wait_event('my event')
     my_args = instance.wait_event('my event', timeout=5)  # wait at most 5seconds
+
+On timeout ``wait_event`` will return ``None``, or raise ``gevent.Timeout`` if ``raises=True``
+
+.. code:: python
+
+    my_args = instance.wait_event('my event', timeout=5)
+    if my_args is None:
+        print "Timeout!"
+
+    try:
+        my_args = instance.wait_event('my event', timeout=5, raises=True)
+    except gevent.Timeout:
+        print "Timeout!"
 
 To remove a callback, or all callbacks.
 

@@ -31,7 +31,7 @@ class EETestCase(unittest.TestCase):
         self.dummy.on('event', result)
         self.dummy.emit('event', 1)
 
-        self.assertEqual(result.get(block=False), 1)
+        self.assertEqual(result.get(block=False), (1,))
 
         result2 = gevent.event.AsyncResult()
         self.dummy.on('event', result2)
@@ -97,11 +97,19 @@ class EETestCase(unittest.TestCase):
 
     def test_wait_event_with_timeout(self):
         def tiny_worker():
+            resp = self.dummy.wait_event('event', timeout=0)
+            self.assertIsNone(resp)
+
+            resp = self.dummy.wait_event('event', timeout=0, raises=False)
+            self.assertIsNone(resp)
+
             with self.assertRaises(gevent.Timeout):
-                self.dummy.wait_event('event', timeout=0)
+                self.dummy.wait_event('event', timeout=0, raises=True)
 
         g = gevent.spawn(tiny_worker)
-        gevent.idle()
+        g.join(2)
+
+        self.assertTrue(g.ready())
 
     def test_remove_listener(self):
         self.dummy.remove_listener('event', None)

@@ -1,4 +1,4 @@
-__version__ = "1.0"
+__version__ = "1.1"
 __author__ = "Rossen Georgiev"
 
 from collections import defaultdict
@@ -28,12 +28,7 @@ class EventEmitter(object):
                 for callback, once in list(self.__callbacks[event].items()):
                     if isinstance(callback, AsyncResult):
                         self.remove_listener(event, callback)
-
-                        result = args
-                        if len(args) == 1:
-                            result = args[0]
-
-                        callback.set(result)
+                        callback.set(args)
                     else:
                         if once:
                             self.remove_listener(event, callback)
@@ -88,20 +83,38 @@ class EventEmitter(object):
         return self.on(event, callback, once=True)
 
 
-    def wait_event(self, event, timeout=None):
+    def wait_event(self, event, timeout=None, raises=False):
         """
         Blocks until an event and returns the results
 
         :param event: event identifier
-        :param timeout: seconds to wait before raising an exception
-        :type timeout: class:`int`
-        :return: returns event arguments, if any. If there are many, returns tuple.
-        :rtype: :class:`None`, any type (single argument), or tuple (multi arguments)
-        :raises: :meth:`gevent.Timeout`
+        :param timeout: (optional)(default:None) seconds to wait
+        :type timeout: :class:`int`
+        :param raises: (optional)(default:False) On timeout if ``False`` return ``None``, else raise ``gevent.Timeout``
+        :type raises: :class:`bool`
+        :return: returns event arguments in tuple
+        :rtype: :class:`None`, or :class:`tuple`
+        :raises: ``gevent.Timeout``
+
+        Handling timeout
+
+        .. code:: python
+
+            args = ee.wait_event('my event', timeout=5)
+            if args is None:
+                print "Timeout!"
+
         """
         result = AsyncResult()
         self.once(event, result)
-        return result.get(True, timeout)
+
+        try:
+            return result.get(True, timeout)
+        except gevent.Timeout:
+            if raises:
+                raise
+            else:
+                return None
 
     def remove_listener(self, event, callback):
         """
