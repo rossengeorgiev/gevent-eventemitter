@@ -15,7 +15,7 @@ To install the latest release from ``pypi``::
 Usage
 =====
 
-Initialization is very simple, simply subclass ``EventEmitter``.
+``EventEmitter`` can be used as mixin, or on it's own. Here is an example as mixin:
 
 .. code:: python
 
