@@ -1,4 +1,4 @@
-__version__ = "1.1"
+__version__ = "1.2"
 __author__ = "Rossen Georgiev"
 
 from collections import defaultdict
@@ -111,6 +111,8 @@ class EventEmitter(object):
         try:
             return result.get(True, timeout)
         except gevent.Timeout:
+            self.remove_listener(event, result)
+
             if raises:
                 raise
             else:
