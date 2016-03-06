@@ -126,8 +126,6 @@ class EETestCase(unittest.TestCase):
         self.assertEqual(self.calls, 0)
 
     def test_remove_all_listeners(self):
-        self.dummy.remove_all_listeners()
-
         @self.dummy.once('event')
         def func_one():
             self.calls += 1
@@ -145,3 +143,22 @@ class EETestCase(unittest.TestCase):
         self.dummy.emit('other')
 
         self.assertEqual(self.calls, 0)
+
+    def test_remove_all_listeners_for_event(self):
+        @self.dummy.once('event')
+        def func_one():
+            self.calls += 1
+
+        @self.dummy.once('event')
+        def func_two():
+            self.calls += 10
+
+        @self.dummy.once('other')
+        def func_three():
+            self.calls += 100
+
+        self.dummy.remove_all_listeners('event')
+        self.dummy.emit('event')
+        self.dummy.emit('other')
+
+        self.assertEqual(self.calls, 100)

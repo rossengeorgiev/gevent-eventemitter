@@ -1,4 +1,4 @@
-__version__ = "1.2"
+__version__ = "1.3"
 __author__ = "Rossen Georgiev"
 
 from collections import defaultdict
@@ -134,11 +134,18 @@ class EventEmitter(object):
                 if not self.__callbacks[event]:
                     del self.__callbacks[event]
 
-    def remove_all_listeners(self):
+    def remove_all_listeners(self, event=None):
         """
-        Removes all registered callbacks
+        Removes all registered callbacks, or all
+        registered callbacks for a specific event
+
+        :param event: event identifier
         """
         if hasattr(self, '_EventEmitter__callbacks'):
-            self.__callbacks.clear()
+            if event is None:
+                self.__callbacks.clear()
+            else:
+                if event in self.__callbacks:
+                    del self.__callbacks[event]
 
 
