@@ -83,7 +83,8 @@ To remove a callback, or all callbacks.
 .. code:: python
 
     instance.remove_listener('my event', do_stuff)
-    instance.remove_all_listeners()
+    instance.remove_all_listeners()                 # absolutely all listeners
+    instance.remove_all_listeners('my event')       # all listners for the event
 
 Listening for ``None`` event will result in catching all events.
 
