@@ -26,12 +26,11 @@ class EventEmitter(object):
         if hasattr(self, '_EventEmitter__callbacks'):
             if event in self.__callbacks:
                 for callback, once in list(self.__callbacks[event].items()):
-                    if isinstance(callback, AsyncResult):
+                    if once:
                         self.remove_listener(event, callback)
+                    if isinstance(callback, AsyncResult):
                         callback.set(args)
                     else:
-                        if once:
-                            self.remove_listener(event, callback)
                         gevent.spawn(callback, *args)
 
                     gevent.idle()
