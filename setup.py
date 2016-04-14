@@ -15,7 +15,7 @@ setup(
     version=__version__,
     description='Implements EventEmitter using gevent',
     long_description=long_description,
-    url='https://github.com/ValvePython/steam',
+    url='https://github.com/rossengeorgiev/gevent-eventemitter',
     author="Rossen Georgiev",
     author_email='rossen@rgp.io',
     license='MIT',
