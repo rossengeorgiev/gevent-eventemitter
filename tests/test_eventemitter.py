@@ -162,3 +162,21 @@ class EETestCase(unittest.TestCase):
         self.dummy.emit('other')
 
         self.assertEqual(self.calls, 100)
+
+    def test_callback_call_order(self):
+        result = []
+
+        def c():
+            result.append(1)
+        def bbb_bbb_bbb():
+            result.append(2)
+        def aaa():
+            result.append(3)
+
+        self.dummy.on('event', aaa)
+        self.dummy.on('event', bbb_bbb_bbb)
+        self.dummy.on('event', c)
+
+        self.dummy.emit('event')
+
+        self.assertEqual(result, [3, 2, 1])

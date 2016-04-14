@@ -1,7 +1,7 @@
 __version__ = "1.3"
 __author__ = "Rossen Georgiev"
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import gevent
 from gevent.event import AsyncResult
 
@@ -60,7 +60,7 @@ class EventEmitter(object):
         """
 
         if not hasattr(self, '_EventEmitter__callbacks'):
-            self.__callbacks = defaultdict(dict)
+            self.__callbacks = defaultdict(OrderedDict)
 
         # when used function
         if callback:
