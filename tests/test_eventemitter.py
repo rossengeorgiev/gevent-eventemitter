@@ -12,6 +12,10 @@ class EETestCase(unittest.TestCase):
         self.dummy = Dummy()
         self.calls = 0
 
+    def idle(self):
+        for _ in range(100):
+            gevent.idle()
+
     def test_emit_with_args(self):
         @self.dummy.on('one')
         def func_one(a):
@@ -24,20 +28,28 @@ class EETestCase(unittest.TestCase):
         self.dummy.emit('one', 1)
         self.dummy.emit('two', 10, 100)
 
+        self.idle()
         self.assertEqual(self.calls, 111)
+
+        self.dummy.emit('one', 1)
+        self.dummy.emit('two', 10, 100)
+
+        self.idle()
+        self.assertEqual(self.calls, 222)
 
     def test_emit_async(self):
         result = gevent.event.AsyncResult()
         self.dummy.on('event', result)
         self.dummy.emit('event', 1)
 
-        self.assertEqual(result.get(block=False), (1,))
+        self.assertEqual(result.get(block=True, timeout=1), (1,))
 
         result2 = gevent.event.AsyncResult()
         self.dummy.on('event', result2)
         self.dummy.emit('event', 1, 2, 3)
 
-        self.assertEqual(result2.get(block=False), (1, 2, 3))
+        self.idle()
+        self.assertEqual(result2.get(block=True, timeout=1), (1, 2, 3))
 
     def test_on(self):
         def func_one():
@@ -50,6 +62,7 @@ class EETestCase(unittest.TestCase):
         self.dummy.on('event', func_two)
         self.dummy.emit('event')
 
+        self.idle()
         self.assertEqual(self.calls, 11)
 
     def test_on_decorator(self):
@@ -63,6 +76,7 @@ class EETestCase(unittest.TestCase):
 
         self.dummy.emit('event')
 
+        self.idle()
         self.assertEqual(self.calls, 11)
 
     def test_once(self):
@@ -73,6 +87,7 @@ class EETestCase(unittest.TestCase):
         self.dummy.emit('event')
         self.dummy.emit('event')
 
+        self.idle()
         self.assertEqual(self.calls, 1)
 
     def test_once_decorator(self):
@@ -83,6 +98,7 @@ class EETestCase(unittest.TestCase):
         self.dummy.emit('event')
         self.dummy.emit('event')
 
+        self.idle()
         self.assertEqual(self.calls, 1)
 
     def test_wait_event(self):
@@ -90,9 +106,11 @@ class EETestCase(unittest.TestCase):
             self.dummy.wait_event('event')
 
         g = gevent.spawn(tiny_worker)
+        self.idle()
 
         self.dummy.emit('event')
 
+        self.idle()
         g.get(block=False)
 
     def test_wait_event_with_timeout(self):
@@ -123,6 +141,7 @@ class EETestCase(unittest.TestCase):
         self.dummy.emit('event')
         self.dummy.emit('event')
 
+        self.idle()
         self.assertEqual(self.calls, 0)
 
     def test_remove_all_listeners(self):
@@ -142,6 +161,7 @@ class EETestCase(unittest.TestCase):
         self.dummy.emit('event')
         self.dummy.emit('other')
 
+        self.idle()
         self.assertEqual(self.calls, 0)
 
     def test_remove_all_listeners_for_event(self):
@@ -161,6 +181,7 @@ class EETestCase(unittest.TestCase):
         self.dummy.emit('event')
         self.dummy.emit('other')
 
+        self.idle()
         self.assertEqual(self.calls, 100)
 
     def test_callback_call_order(self):
@@ -179,4 +200,5 @@ class EETestCase(unittest.TestCase):
 
         self.dummy.emit('event')
 
+        self.idle()
         self.assertEqual(result, [3, 2, 1])

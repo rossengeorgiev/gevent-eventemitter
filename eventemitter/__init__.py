@@ -1,9 +1,10 @@
-__version__ = "1.4"
+__version__ = "2.0"
 __author__ = "Rossen Georgiev"
 
 from collections import defaultdict, OrderedDict
 import gevent
 from gevent.event import AsyncResult
+from gevent.queue import Queue
 
 
 class EventEmitter(object):
@@ -11,6 +12,7 @@ class EventEmitter(object):
     Implements event emitter using ``gevent`` module.
     Every callback is executed via :meth:`gevent.spawn`.
     """
+    __worker = None
 
     def emit(self, event, *args):
         """
@@ -20,24 +22,29 @@ class EventEmitter(object):
         :type event: any type
         :param args: any or no arguments
         """
-
-        gevent.idle()
-
         if hasattr(self, '_EventEmitter__callbacks'):
-            if event in self.__callbacks:
-                for callback, once in list(self.__callbacks[event].items()):
-                    if once:
-                        self.remove_listener(event, callback)
-                    if isinstance(callback, AsyncResult):
-                        callback.set(args)
-                    else:
-                        gevent.spawn(callback, *args)
+            self.__queue.put((event, args))
+            self.__queue.put((None, (event,) + args))
 
-                    gevent.idle()
+            if self.__worker is None or self.__worker.ready():
+                self.__worker = gevent.spawn(self.__emit_worker)
 
-        # every event is also emitted as None
-        if event is not None:
-            self.emit(None, event, *args)
+    def __emit_worker(self):
+        for event, args in self.__queue:
+            if hasattr(self, '_EventEmitter__callbacks'):
+                if event in self.__callbacks:
+                    for callback, once in list(self.__callbacks[event].items()):
+                        if once:
+                            self.remove_listener(event, callback)
+                        if isinstance(callback, AsyncResult):
+                            callback.set(args)
+                        else:
+                            gevent.spawn(callback, *args)
+
+                        gevent.idle()
+
+            if self.__queue.empty():
+                break
 
     def on(self, event, callback=None, once=False):
         """
@@ -61,6 +68,7 @@ class EventEmitter(object):
 
         if not hasattr(self, '_EventEmitter__callbacks'):
             self.__callbacks = defaultdict(OrderedDict)
+            self.__queue = Queue()
 
         # when used function
         if callback:
