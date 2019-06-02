@@ -18,7 +18,7 @@ init:
 
 test:
 	coverage erase
-	nosetests --verbosity 1 --with-coverage --cover-package=eventemitter
+	PYTHONHASHSEED=0 python -m pytest --cov=eventemitter tests
 
 pylint:
 	pylint -r n -f colorized eventemitter || true
