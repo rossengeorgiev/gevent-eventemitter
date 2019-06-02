@@ -202,3 +202,25 @@ class EETestCase(unittest.TestCase):
 
         self.idle()
         self.assertEqual(result, [3, 2, 1])
+
+    def test_count_listeners(self):
+        @self.dummy.on('event')
+        def func_one():
+            self.calls += 1
+
+        self.assertEqual(self.dummy.count_listeners('event'), 1)
+
+        self.dummy.once('event', func_one)
+
+        self.assertEqual(self.dummy.count_listeners('event'), 1)
+
+        self.dummy.remove_all_listeners('event')
+
+        self.assertEqual(self.dummy.count_listeners('event'), 0)
+
+    def test_count_listeners_with_no_listeners(self):
+        self.assertEqual(self.dummy.count_listeners(None), 0)
+        self.assertEqual(self.dummy.count_listeners('event'), 0)
+        self.assertEqual(self.dummy.count_listeners(''), 0)
+        self.assertEqual(self.dummy.count_listeners(1), 0)
+        self.assertEqual(self.dummy.count_listeners(0), 0)

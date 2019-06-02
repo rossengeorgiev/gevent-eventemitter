@@ -1,4 +1,4 @@
-__version__ = "2.0"
+__version__ = "2.1"
 __author__ = "Rossen Georgiev"
 
 from collections import defaultdict, OrderedDict
@@ -154,5 +154,20 @@ class EventEmitter(object):
             else:
                 if event in self.__callbacks:
                     del self.__callbacks[event]
+
+    def count_listeners(self, event):
+        """
+        Returns a count of how many listeners are
+        registered registed for a specific event
+
+        :param event: event identifier
+        :returns: number of listeners
+        :rtype: int
+        """
+        if hasattr(self, '_EventEmitter__callbacks'):
+            if event in self.__callbacks:
+                return len(self.__callbacks[event])
+
+        return 0
 
 
