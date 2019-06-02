@@ -29,6 +29,8 @@ setup(
     ],
     keywords='gevent event emitter ee greenlet',
     packages=['eventemitter'],
-    install_requires=['gevent'],
+    install_requires=[
+        'gevent>=1.3',
+        ],
     zip_safe=True,
 )
