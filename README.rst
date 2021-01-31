@@ -97,7 +97,7 @@ Listening for ``None`` event will result in catching all events.
     :target: https://coveralls.io/r/rossengeorgiev/gevent-eventemitter?branch=master
     :alt: Test coverage
 
-.. |master_build| image:: https://img.shields.io/travis/rossengeorgiev/gevent-eventemitter/master.svg?style=flat&label=master%20build
-    :target: http://travis-ci.org/rossengeorgiev/gevent-eventemitter
+.. |master_build| image:: https://github.com/rossengeorgiev/gevent-eventemitter/workflows/Tests/badge.svg?branch=master
+    :target: https://github.com/rossengeorgiev/gevent-eventemitter/actions?query=workflow%3A%22Tests%22+branch%3Amaster
     :alt: Build status of master branch
 

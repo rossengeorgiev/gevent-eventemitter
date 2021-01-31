@@ -14,11 +14,17 @@ help:
 	@echo "$$HELPBODY"
 
 init:
-	pip install -r requirements.txt
+	pip install -r dev_requirements.txt
+
+COVOPTS = --cov-config .coveragerc --cov=eventemitter
+
+ifeq ($(NOCOV), 1)
+	COVOPTS =
+endif
 
 test:
-	coverage erase
-	PYTHONHASHSEED=0 python -m pytest --cov=eventemitter tests
+	rm -f .coverage eventemitter/*.pyc tests/*.pyc
+	PYTHONHASHSEED=0 pytest --tb=short $(COVOPTS) tests
 
 pylint:
 	pylint -r n -f colorized eventemitter || true
